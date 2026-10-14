@@ -137,8 +137,10 @@ def verify():
 def incoming():
     try:
         data = request.get_json()
-        print("WEBHOOK HIT:", json.dumps(data)[:400], flush=True)
         value = data["entry"][0]["changes"][0]["value"]
+        for st in value.get("statuses", []):
+            print("STATUS", st.get("status"), "to", st.get("recipient_id"),
+                  "errors:", json.dumps(st.get("errors"))[:600], flush=True)
         for m in value.get("messages", []):
             sender = m["from"]
             print("MESSAGE from", sender, m.get("type"), flush=True)
