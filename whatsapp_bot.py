@@ -64,12 +64,13 @@ def add_order(client, brand, item_no, qty):
 
 # ---------- WhatsApp send ----------
 def send(to, text):
-    requests.post(
+    r = requests.post(
         f"https://graph.facebook.com/v20.0/{PHONE_ID}/messages",
         headers={"Authorization": f"Bearer {WA_TOKEN}"},
         json={"messaging_product": "whatsapp", "to": to,
               "type": "text", "text": {"body": text}},
         timeout=15)
+    print("SEND ->", to, r.status_code, r.text[:300], flush=True)
 
 # ---------- Bot logic ----------
 HELP = ("Namaste! 🙏\n"
@@ -135,15 +136,18 @@ def verify():
 @app.route("/webhook", methods=["POST"])
 def incoming():
     try:
-        value = request.get_json()["entry"][0]["changes"][0]["value"]
+        data = request.get_json()
+        print("WEBHOOK HIT:", json.dumps(data)[:400], flush=True)
+        value = data["entry"][0]["changes"][0]["value"]
         for m in value.get("messages", []):
             sender = m["from"]
+            print("MESSAGE from", sender, m.get("type"), flush=True)
             if sender in IGNORE_NUMBERS or sender in OWNER_NUMBERS:
                 continue
             if m["type"] == "text":
                 handle(sender, m["text"]["body"])
     except Exception as e:
-        print("error:", e)
+        print("error:", repr(e), flush=True)
     return "ok", 200
 
 @app.route("/")
