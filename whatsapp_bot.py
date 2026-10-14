@@ -153,3 +153,23 @@ def incoming():
 @app.route("/")
 def home():
     return "Bot running"
+
+# one-time helper: open /subscribe in Chrome to link this app to the WhatsApp account
+WABA_ID = os.environ.get("WABA_ID", "1646734130491668")
+
+@app.route("/subscribe")
+def subscribe():
+    r = requests.post(
+        f"https://graph.facebook.com/v20.0/{WABA_ID}/subscribed_apps",
+        headers={"Authorization": f"Bearer {WA_TOKEN}"}, timeout=15)
+    return r.text, r.status_code
+
+# simple privacy policy page (needed by Meta to take the app Live)
+@app.route("/privacy")
+def privacy():
+    return ("<h1>Privacy Policy</h1>"
+            "<p>This WhatsApp bot answers stock inquiries and records orders "
+            "sent by customers. We only use the phone number and message text "
+            "to reply and to process the order. We do not sell or share this "
+            "data with third parties. To request deletion of your data, "
+            "message us on WhatsApp.</p>")
